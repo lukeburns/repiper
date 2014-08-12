@@ -1,0 +1,16 @@
+{
+  "name": "repiper",
+  "description": "Repipe source streams and destination streams.",
+  "version": "0.0.0",
+  "repository": {
+    "url": "git://github.com/lukeburns/repiper.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "piped": "^0.0.0",
+    "readable-stream": "^1.0.27-1"
+  }
+}
