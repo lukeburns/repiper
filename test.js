@@ -1,32 +1,36 @@
 var test = require('tape');
 var PassThrough = require('readable-stream/passthrough');
 var piped = require('piped');
-var Repiper = require('./');
+var repiper = require('./');
 
-test('pipes source to inbound streams', function (t) {
-  t.plan(1);
+test('pipes source to writable streams', function (t) {
+  t.plan(2);
 
   var source = new PassThrough;
-  var inbound = [new PassThrough];
+  var writables = [new PassThrough, new PassThrough];
 
-  inbound[0].on('pipe', function (src) {
-    t.equal(src, source);
-  });
+  writables.forEach(function (writable) {
+    writable.on('pipe', function (src) {
+      t.equal(src, source);
+    });
+  })
 
-  var repiper = new Repiper(inbound, null);
-  source.pipe(repiper)
+  var r = repiper(writables, null);
+  source.pipe(r)
 });
 
-test('pipes to outbound streams to destination', function (t) {
-  t.plan(1);
+test('pipes to readable streams to destination', function (t) {
+  t.plan(2);
 
-  var outbound = [piped(new PassThrough)];
+  var readables = [piped(new PassThrough), piped(new PassThrough)];
   var destination = new PassThrough;
 
-  outbound[0].on('piped', function (dest) {
-    t.equal(dest, destination);
-  });
+  readables.forEach(function (readable) {
+    readable.on('piped', function (dest) {
+      t.equal(dest, destination);
+    });
+  })
 
-  var repiper = new Repiper(null, outbound);
-  repiper.pipe(destination);
+  var r = repiper(null, readables);
+  r.pipe(destination);
 });

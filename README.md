@@ -1,7 +1,7 @@
-Repiper
+repiper
 =====
 
-Repiper is a noop duplex stream that repipes its source stream to writable streams and readable streams to its destination stream.
+repiper is a duplex stream that handles repiping from its source stream and to its destination stream.
 
 Usage
 =====
@@ -9,17 +9,18 @@ Usage
 Require repiper.
 
 ```
-var Repiper = require('repiper');
+var repiper = require('repiper');
 ```
 
-Create an instance.
+Create a repiper stream.
 
 ```
-new Repiper(writable, readable)
+repiper(writables, readables, [duplex])
 ```
 
-  - writable `Stream | Array of Streams`  Streams to pipe to (from source stream)
-  - readable `Stream | Array of Streams`  Streams to pipe from (to destination stream)
+  - writables `Stream | Array of Streams` Streams to pipe to (from source stream)
+  - readables `Stream | Array of Streams` Streams to pipe from (to destination stream)
+  - duplex (optional) `Stream` Duplex stream that repiper will return. If none provided, a noop duplex is used.
 
 Examples
 ========
@@ -31,8 +32,8 @@ a.pipe(b);
 c.pipe(d);
 ```
 ```
-var repiper = new Repiper([a, c]);
-source.pipe(repiper);
+var r = repiper([a, c]);
+source.pipe(r);
 ```
 becomes
 
@@ -47,8 +48,8 @@ source.pipe(c).pipe(d)
 inbound.pipe(middleware).pipe(outbound);
 ```
 ```
-var repiper = new Repiper(inbound, outbound);
-source.pipe(repiper).pipe(destination);
+var r = repiper(inbound, outbound);
+source.pipe(r).pipe(destination);
 ```
 
 becomes

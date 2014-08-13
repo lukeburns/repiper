@@ -1,36 +1,39 @@
 var util = require('util');
 var Duplex = require('readable-stream/duplex');
+var duplexer = require('duplexer2');
 var piped = require('piped');
 
-module.exports = Repiper;
+module.exports = repiper;
 
-function Repiper (inbound, outbound, options) {
-  if (!(inbound instanceof Array)) {
-    inbound = (inbound && inbound.pipe) ? [inbound] : [];
+function repiper (writables, readables, duplex) {
+  if (!(writables instanceof Array)) {
+    writables = (writables && writables.pipe) ? [writables] : [];
   }
-  if (!(outbound instanceof Array)) {
-    outbound = (outbound && outbound.pipe) ? [outbound] : [];
+  if (!(readables instanceof Array)) {
+    readables = (readables && readables.pipe) ? [readables] : [];
   }
+  if (!duplex) {
+    duplex = new Duplex;
+    duplex._read = function () {}
+    duplex._write = function () {}
+  }
+  duplex.repiper = true;
 
-  Duplex.call(this, options);
-  piped(this);
-
-  this.on('pipe', function (src) {
-    src.unpipe(this);
-    inbound.forEach(function (dest) {
+  duplex.on('pipe', function (src) {
+    src.unpipe(duplex);
+    writables.forEach(function (dest) {
       src.pipe(dest);
     });
   });
 
-  this.on('piped', function (dest) {
-    if (!(dest instanceof Repiper)) {
-      this.unpipe(dest);
-      outbound.forEach(function (src) {
+  duplex.on('piped', function (dest) {
+    if (!(dest.repiper)) {
+      duplex.unpipe(dest);
+      readables.forEach(function (src) {
         src.pipe(dest);
       });
     }
   });
-}
 
-util.inherits(Repiper, Duplex);
-Repiper.prototype._read = Repiper.prototype._write = function () {};
+  return piped(duplex);
+}
