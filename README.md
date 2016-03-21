@@ -7,7 +7,7 @@ repiper is a stream that repipes its sources and destinations.
 src.pipe(repiper(writables, [readables])).pipe(dest)
 ```
 
-pipes `src` to each writable in `writables` and pipes each readable in `readables` to `dest`. If `readables` is undefined, then the `readables` are considered the `writables`.
+pipes `src` to each writable in `writables` and pipes each readable in `readables` to `dest`. If `readables` is undefined, then the `readables` are treated as `writables`.
 
 Installation
 ============
