@@ -31,6 +31,26 @@ test('pipes to readable streams to destination', function (t) {
     });
   })
 
-  var r = repiper(null, readables);
+  var r = repiper(readables);
   r.pipe(destination);
+});
+
+test('pipes to streams from source and to destination', function (t) {
+  t.plan(4);
+
+  var streams = [piped(new PassThrough), piped(new PassThrough)];
+  var source = new PassThrough;
+  var destination = new PassThrough;
+
+  streams.forEach(function (stream) {
+    stream.on('pipe', function (src) {
+      t.equal(src, source);
+    });
+    stream.on('piped', function (dest) {
+      t.equal(dest, destination);
+    });
+  })
+
+  var r = repiper(streams);
+  source.pipe(r).pipe(destination);
 });

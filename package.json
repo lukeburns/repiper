@@ -1,7 +1,7 @@
 {
   "name": "repiper",
-  "description": "Repipe source streams and destination streams.",
-  "version": "0.0.0",
+  "description": "Repipe from source streams and to destination streams.",
+  "version": "0.0.2",
   "repository": {
     "url": "git://github.com/lukeburns/repiper.git"
   },

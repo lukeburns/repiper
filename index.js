@@ -1,39 +1,33 @@
-var util = require('util');
-var Duplex = require('readable-stream/duplex');
-var duplexer = require('duplexer2');
+var PassThrough = require('readable-stream/passthrough');
 var piped = require('piped');
 
-module.exports = repiper;
-
-function repiper (writables, readables, duplex) {
+module.exports = function (writables, readables) {
   if (!(writables instanceof Array)) {
     writables = (writables && writables.pipe) ? [writables] : [];
   }
   if (!(readables instanceof Array)) {
-    readables = (readables && readables.pipe) ? [readables] : [];
+    if (readables === undefined) readables = writables;
+    else readables = (readables && readables.pipe) ? [readables] : [];
   }
-  if (!duplex) {
-    duplex = new Duplex;
-    duplex._read = function () {}
-    duplex._write = function () {}
-  }
-  duplex.repiper = true;
 
-  duplex.on('pipe', function (src) {
-    src.unpipe(duplex);
+  var piper = new PassThrough();
+  piper.repiper = true;
+
+  piper.on('pipe', function (src) {
+    src.unpipe(piper);
     writables.forEach(function (dest) {
       src.pipe(dest);
     });
   });
 
-  duplex.on('piped', function (dest) {
+  piper.on('piped', function (dest) {
     if (!(dest.repiper)) {
-      duplex.unpipe(dest);
+      piper.unpipe(dest);
       readables.forEach(function (src) {
         src.pipe(dest);
       });
     }
   });
 
-  return piped(duplex);
+  return piped(piper);
 }

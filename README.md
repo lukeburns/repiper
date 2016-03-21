@@ -1,66 +1,60 @@
 repiper
 =====
 
-repiper is a duplex stream that handles repiping from its source stream and to its destination stream.
-
-Usage
-=====
-
-Require repiper.
+repiper is a stream that repipes its sources and destinations.
 
 ```
-var repiper = require('repiper');
+src.pipe(repiper([writables], [readables])).pipe(dest)
 ```
 
-Create a repiper stream.
-
-```
-repiper(writables, readables, [duplex])
-```
-
-  - writables `Stream | Array of Streams` Streams to pipe to (from source stream)
-  - readables `Stream | Array of Streams` Streams to pipe from (to destination stream)
-  - duplex (optional) `Stream` Duplex stream that repiper will return. If none provided, a noop duplex is used.
-
-Examples
-========
-
-#### Forks
-
-```
-a.pipe(b);
-c.pipe(d);
-```
-```
-var r = repiper([a, c]);
-source.pipe(r);
-```
-becomes
-
-```
-source.pipe(a).pipe(b)
-source.pipe(c).pipe(d)
-```
-
-#### Pipelines
-
-```
-inbound.pipe(middleware).pipe(outbound);
-```
-```
-var r = repiper(inbound, outbound);
-source.pipe(r).pipe(destination);
-```
-
-becomes
-
-```
-source.pipe(inbound).pipe(middleware).pipe(outbound).pipe(destination);
-```
+pipes `src` to each writable in `writables` and pipes each readable in `readables` to dest.
 
 Installation
 ============
 
 ```
 npm install repiper
+```
+
+Examples
+========
+
+#### Forks
+
+
+```
+source.pipe(repiper([a, b]))
+```
+
+becomes
+
+```
+source.pipe(a)
+source.pipe(b)
+```
+
+#### Merge
+
+```
+repiper([], [a,b]).pipe(dest);
+```
+
+becomes
+
+```
+a.pipe(dest)
+b.pipe(dest)
+```
+
+#### Pipelines
+
+```
+inbound.pipe(middleware).pipe(outbound);
+source.pipe(repiper(inbound, outbound)).pipe(destination);
+```
+
+becomes
+
+```
+source.pipe(inbound).pipe(middleware).pipe(outbound).pipe(destination);
 ```
